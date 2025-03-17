@@ -1,0 +1,22 @@
+name: Deploy HTML
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+
+      - name: Copiar arquivos via SSH
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.WEBSITE_DEPLOY_SERVER_IP_VULTR }}
+          username: ${{ secrets.WEBSITE_DEPLOY_USER }}
+          password: ${{ secrets.WEBSITE_DEPLOY_PASSWORD }}
+          source: "."
+          target: "/opt/nginxroot/htmlsilas"
