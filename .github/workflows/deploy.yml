@@ -16,6 +16,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ vars.WEBSITE_DEPLOY_SERVER_IP_VULTR }}
+          port: ${{ vars.WEBSITE_DEPLOY_SERVER_IP_VULTR_PORT }}
           username: ${{ secrets.WEBSITE_DEPLOY_USER }}
           password: ${{ secrets.WEBSITE_DEPLOY_PASSWORD }}
           source: "."
