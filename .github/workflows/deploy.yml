@@ -1,16 +1,33 @@
-name: Deploy HTML
+name: Deploy
 
 on:
+  workflow_dispatch: # Permite execução manual
   push:
     branches:
-      - main
+      - main  # Ajuste conforme necessário
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  deploy_vpn:
+    runs-on: ubuntu-latest  # Use self-hosted se necessário
     steps:
-      - name: Checkout código
-        uses: actions/checkout@v3
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Instalar OpenVPN
+        run: sudo apt-get update && sudo apt-get install -y openvpn
+
+      - name: Criar arquivo de configuração OpenVPN
+        run: |
+          echo "${{ secrets.OPENVPN_CONFIG }}" > vpn.ovpn
+          chmod 600 vpn.ovpn
+
+      - name: Conectar à VPN
+        run: |
+          sudo openvpn --config vpn.ovpn --daemon
+          sleep 10  # Espera a conexão estabilizar
+
+      - name: Testar conexão VPN
+        run: ping -c 4 ${{ vars.WEBSITE_DEPLOY_SERVER_IP_VULTR }}
 
       - name: Copiar arquivos via SSH
         uses: appleboy/scp-action@v0.1.4
@@ -21,3 +38,7 @@ jobs:
           password: ${{ secrets.WEBSITE_DEPLOY_PASSWORD }}
           source: "."
           target: "/opt/nginxroot/htmlsilas"
+
+      - name: Finalizar conexão VPN
+        if: always()
+        run: sudo pkill openvpn
